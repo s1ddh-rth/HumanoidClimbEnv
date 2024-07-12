@@ -1,10 +1,12 @@
 from humanoid_climb.assets.robot_util import *
 
+
 class Asset:
-    def __init__(self, bullet_client, config_asset):
+    def __init__(self, bullet_client, config_asset, config):
         self.id = None
 
-        asset_info = config_asset['asset_data']
+        asset_name = config_asset['asset']
+        asset_info = config['assets'][asset_name]
 
         if asset_info['type'] == 'URDF':
             self.id = bullet_client.loadURDF(fileName=asset_info['path'])
