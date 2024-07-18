@@ -4,16 +4,16 @@
 
   "assets": {
     "asset_climber_robot": {
-      "path": "E:\\Programs\\GymRL\\PyBullet\\CS3IP\\CS3IP\\humanoid_climb\\assets\\humanoid.xml",
+      "path": "./humanoid_climb/assets/humanoid_symmetric.xml",
       "type": "URDF"
     },
     "asset_hold": {
-      "path": "E:\\Programs\\GymRL\\PyBullet\\CS3IP\\CS3IP\\humanoid_climb\\assets\\target.xml",
+      "path": "./humanoid_climb/assets/target.xml",
       "type": "URDF"
     },
 
     "climbing_wall": {
-      "path": "E:\\Programs\\GymRL\\PyBullet\\CS3IP\\CS3IP\\humanoid_climb\\assets\\wall.xml",
+      "path": "./humanoid_climb/assets/wall.xml",
       "type": "URDF"
     },
 
@@ -207,7 +207,7 @@
     "0": {
       "desired_holds": [-1, -1, -1, -1],
       "force_attach": [null, null, null, null],
-      "ignore_holds": [[], [], [], []],
+      "ignore_holds": [[], [], [], []]
     },
     "1": {
       "desired_holds": ["hold_10", "hold_9", -1, -1],
