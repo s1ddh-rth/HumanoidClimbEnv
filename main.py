@@ -1,72 +1,68 @@
-import os
-import random
-
 import gymnasium as gym
-import humanoid_climb
 import pybullet as p
-import time
-from stable_baselines3 import PPO, SAC
-import humanoid_climb.stances as stances
+from stable_baselines3 import PPO
 from humanoid_climb.climbing_config import ClimbingConfig
 
 
-stances.set_root_path("./humanoid_climb")
-stance = stances.STANCE_3
-
+# load config, create and reset env, load policy
 config = ClimbingConfig('./config.json')
-
-
 env = gym.make('HumanoidClimb-v0',
                render_mode='human',
                max_ep_steps=10000000,
                config=config)
+obs, info = env.reset()
+model = PPO.load("./humanoid_climb/models/1_10_9_n_n.zip", env=env)
 
-ob, info = env.reset(seed=42)
+# prepare variables for the while loop
+done, truncated = False, False
+score, step = 0, 0
+paused = False
 
-state = env.reset()
-done = False
-truncated = False
-score = 0
-step = 0
-pause = False
-hold = True
-
-action = [0.0 for i in range(env.action_space.shape[0])]
-action[-4] = 1
-action[-3] = 1
-action[-2] = 1
-action[-1] = 1
+print('In PyBullet window, press:')
+print('\tr          reset episode')
+print('\tspacebar   pause episode')
+print('\tq          quit')
 
 while True:
-
-    if not pause:
+    if not paused:
+        # use policy to predict next action, then step environment
+        action, _states = model.predict(obs, deterministic=True)
         obs, reward, done, truncated, info = env.step(action)
         score += reward
         step += 1
 
-    # Reset on backspace
+    if (step % 200 == 0) and not paused:
+        print(f'step {step}: score {score}')
+
+    # if episode terminates, pause (user needs to reset)
+    # note that episode currently does not terminate after goal has successfully been reached
+    if (done or truncated) and not paused:
+        print(f'terminated after {step} steps. score: {score}')
+        paused = True
+
+    # get keys
     keys = p.getKeyboardEvents()
-
-    # rarrow
-    if 65296 in keys and keys[65296] & p.KEY_WAS_TRIGGERED:
-        pass
-
-    # r
-    if 114 in keys and keys[114] & p.KEY_WAS_TRIGGERED:
-        print(f"Score: {score}, Steps {step}")
+    # reset on r
+    r_key = ord('r')
+    if r_key in keys and keys[r_key] & p.KEY_WAS_TRIGGERED:
+        print('resetting...')
         done = False
         truncated = False
-        pause = False
+        paused = False
         score = 0
         step = 0
-        env.reset()
+        obs, info = env.reset()
 
-    # Pause on space
-    if 32 in keys and keys[32] & p.KEY_WAS_TRIGGERED:
-        pause = not pause
-        print("Paused" if pause else "Unpaused")
+    # pause on space
+    pause_key = ord(' ')
+    if pause_key in keys and keys[pause_key] & p.KEY_WAS_TRIGGERED:
+        paused = not paused
+        print('paused' if paused else 'unpaused')
 
-    if done or truncated:
-        pause = True
+    # quit on q
+    q_key = ord('q')
+    if q_key in keys and keys[q_key] & p.KEY_WAS_TRIGGERED:
+        print('quitting...')
+        break
 
 env.close()
