@@ -20,10 +20,9 @@ class HumanoidClimbEnv(gym.Env):
         self.max_ep_steps = max_ep_steps
         self.steps = 0
 
-        stance_path = self.config['stance_path']
-        self.motion_path = [stance_path[stance]['desired_holds'] for stance in stance_path]
-        self.motion_exclude_targets = [stance_path[stance]['ignore_holds'] for stance in stance_path]
-        self.action_override = [stance_path[stance]['force_attach'] for stance in stance_path]
+        self.motion_path = [self.config.stance_path[stance]['desired_holds'] for stance in self.config.stance_path]
+        self.motion_exclude_targets = [self.config.stance_path[stance]['ignore_holds'] for stance in self.config.stance_path]
+        self.action_override = [self.config.stance_path[stance]['force_attach'] for stance in self.config.stance_path]
 
         self.init_from_state = False if state_file is None else True
         self.state_file = state_file
@@ -49,18 +48,18 @@ class HumanoidClimbEnv(gym.Env):
         self._p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
         self._p.resetDebugVisualizerCamera(cameraDistance=4, cameraYaw=-90, cameraPitch=0, cameraTargetPosition=[0, 0, 3])
         self._p.setGravity(0, 0, -9.8)
-        self._p.setPhysicsEngineParameter(fixedTimeStep= self.config['timestep_interval'], numSubSteps=self.config['timestep_per_action'])
+        self._p.setPhysicsEngineParameter(fixedTimeStep= self.config.timestep_interval, numSubSteps=self.config.timestep_per_action)
 
-        # self.floor = self._p.loadURDF("plane.urdf")
-        self.floor = Asset(self._p, self.config['ground_plane'], self.config)
-        self.wall = Asset(self._p, self.config['surface'], self.config)
-        self.climber = Humanoid(self._p, self.config['climber'])
+        self.floor = self._p.loadURDF("plane.urdf")
+        self.floor = Asset(self._p, self.config.plane)
+        self.wall = Asset(self._p, self.config.surface)
+        self.climber = Humanoid(self._p, self.config.climber)
 
         self.debug_stance_text = self._p.addUserDebugText(text=f"", textPosition=[0, 0, 0], textSize=1, lifeTime=0.1, textColorRGB=[1.0, 0.0, 1.0])
 
         self.targets = dict()
-        for key in self.config['holds']:
-            self.targets[key] = Asset(self._p, self.config['holds'][key], self.config)
+        for key in self.config.holds:
+            self.targets[key] = Asset(self._p, self.config.holds[key])
             self._p.addUserDebugText(text=key, textPosition=self.targets[key].body.initialPosition, textSize=0.7, lifeTime=0.0, textColorRGB=[0.0, 0.0, 1.0])
 
         self.climber.targets = self.targets

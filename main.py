@@ -1,24 +1,22 @@
-import json
+import os
+import random
+
 import gymnasium as gym
 import humanoid_climb
 import pybullet as p
 import time
-# from stable_baselines3 import PPO, SAC
+from stable_baselines3 import PPO, SAC
 import humanoid_climb.stances as stances
 
 
 stances.set_root_path("./humanoid_climb")
 stance = stances.STANCE_3
 
-with open('config.json', 'r') as config_file:
-    config_data = json.load(config_file)
-
-print([key for key in config_data.keys()])
 
 env = gym.make('HumanoidClimb-v0',
                render_mode='human',
                max_ep_steps=10000000,
-               config=config_data)
+               config_path="./config.json")
 
 ob, info = env.reset(seed=42)
 

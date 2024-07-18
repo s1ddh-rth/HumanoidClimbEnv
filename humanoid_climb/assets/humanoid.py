@@ -11,7 +11,8 @@ from humanoid_climb.assets.robot_util import *
 class Humanoid:
 
     def __init__(self, bullet_client, config, fixedBase=False):
-        urdf_fn = config['urdf_fn']
+        f_name = os.path.join(os.path.dirname(__file__), 'humanoid_symmetric.xml')
+
         power = config['power']
         position = config['position']
         orientation = config['orientation']
@@ -20,7 +21,7 @@ class Humanoid:
         self.power = power
 
         # TODO: make dynamic
-        self.robot = bullet_client.loadMJCF(urdf_fn, flags=p.URDF_USE_SELF_COLLISION)[0]
+        self.robot = bullet_client.loadMJCF(f_name, flags=p.URDF_USE_SELF_COLLISION)[0]
         bullet_client.resetBasePositionAndOrientation(self.robot, position, orientation)
         if fixedBase:
             self.base_constraint = bullet_client.createConstraint(self.robot, -1, -1, -1, p.JOINT_FIXED, [0, 0, 0],
