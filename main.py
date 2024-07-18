@@ -7,16 +7,19 @@ import pybullet as p
 import time
 from stable_baselines3 import PPO, SAC
 import humanoid_climb.stances as stances
+from humanoid_climb.climbing_config import ClimbingConfig
 
 
 stances.set_root_path("./humanoid_climb")
 stance = stances.STANCE_3
 
+config = ClimbingConfig('./config.json')
+
 
 env = gym.make('HumanoidClimb-v0',
                render_mode='human',
                max_ep_steps=10000000,
-               config_path="./config.json")
+               config=config)
 
 ob, info = env.reset(seed=42)
 
