@@ -20,7 +20,17 @@ from wandb.integration.sb3 import WandbCallback
 import humanoid_climb.stances as stances
 
 import torch
-torch.cuda.set_device(2,3)
+
+cuda_devices = os.environ.get('CUDA_VISIBLE_DEVICES')
+if cuda_devices:
+    # Get the first available GPU from CUDA_VISIBLE_DEVICES
+    device_id = int(cuda_devices.split(',')[0])
+    torch.cuda.set_device(device_id)
+    print(f"Using GPU: {device_id}")
+else:
+    print("No CUDA_VISIBLE_DEVICES set, using default GPU if available")
+
+# Then use this device throughout your code
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 print(f"GPU available: {torch.cuda.is_available()}")
