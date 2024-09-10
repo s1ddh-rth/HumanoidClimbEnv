@@ -6,6 +6,9 @@ import pybullet as p
 import stable_baselines3 as sb
 import os
 import argparse
+import json
+from humanoid_climb.climbing_config import ClimbingConfig
+
 
 from stable_baselines3.common.callbacks import EvalCallback, BaseCallback
 from stable_baselines3.common.monitor import Monitor
@@ -46,15 +49,58 @@ class CustomCallback(BaseCallback):
 		self.logger.record("climb/rollout_count", self.rollout_count)
 
 
-def make_env(env_id: str, rank: int, seed: int = 0, max_steps: int = 1000, stance: stances.Stance = stances.STANCE_NONE) -> gym.Env:
-	def _init():
-		env = gym.make(env_id, render_mode=None, max_ep_steps=max_steps, **stance.get_args())
-		m_env = Monitor(env)
-		m_env.reset(seed=seed + rank)
-		return m_env
+# def make_env(env_id: str, rank: int, seed: int = 0, max_steps: int = 1000, stance: stances.Stance = stances.STANCE_NONE) -> gym.Env:
+# 	def _init():
+# 		env = gym.make(env_id, render_mode=None, max_ep_steps=max_steps, **stance.get_args())
+# 		m_env = Monitor(env)
+# 		m_env.reset(seed=seed + rank)
+# 		return m_env
 
-	set_random_seed(seed)
-	return _init
+# 	set_random_seed(seed)
+# 	return _init
+
+
+# THIRD ATTEMPT 
+# def make_env(env_id: str, rank: int, seed: int = 0, max_steps: int = 1000, stance: stances.Stance = stances.STANCE_NONE) -> gym.Env:
+#     def _init():
+#         env_args = stance.get_args()
+#         # Removing 'motion_path', 'action_override', and 'motion_exclude_targets'
+#         env_args.pop('motion_path', None)
+#         env_args.pop('action_override', None)
+#         env_args.pop('motion_exclude_targets', None)
+#         env = gym.make(env_id, render_mode=None, max_ep_steps=max_steps, **env_args)
+#         m_env = Monitor(env)
+#         m_env.reset(seed=seed + rank)
+#         return m_env
+
+#     set_random_seed(seed)
+#     return _init
+
+def make_env(env_id: str, rank: int, seed: int = 0, max_steps: int = 1000, stance: stances.Stance = stances.STANCE_NONE) -> gym.Env:
+    def _init():
+        #with open('./config.json', 'r') as f:
+        #    config = json.load(f)
+        config = ClimbingConfig('./config.json')
+
+
+        # Merge stance args with config
+        #env_args = stance.get_args()
+        #config.update(env_args)
+
+        # Remove unnecessary keys
+        #config.pop('motion_path', None)
+        #config.pop('action_override', None)
+        #config.pop('motion_exclude_targets', None)
+
+        env = gym.make(env_id, config=config, render_mode=None, max_ep_steps=max_steps)
+        m_env = Monitor(env)
+        m_env.reset(seed=seed + rank)
+        return m_env
+
+    set_random_seed(seed)
+    return _init
+
+
 
 
 def train(env_name, sb3_algo, workers, path_to_model=None):

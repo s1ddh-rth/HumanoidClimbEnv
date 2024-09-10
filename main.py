@@ -12,6 +12,9 @@ env = gym.make('HumanoidClimb-v0',
                config=config)
 obs, info = env.reset()
 model = PPO.load("./humanoid_climb/models/1_10_9_n_n.zip", env=env)
+# model = PPO.load("./humanoid_climb/models/2_10_9_2_n.zip", env=env)
+# model = PPO.load("./humanoid_climb/models/3_10_9_2_1.zip", env=env)
+# model = PPO.load("./humanoid_climb/models/4_10_13_2_1.zip", env=env)
 
 # prepare variables for the while loop
 done, truncated = False, False
