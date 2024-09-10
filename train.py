@@ -19,23 +19,23 @@ import wandb
 from wandb.integration.sb3 import WandbCallback
 import humanoid_climb.stances as stances
 
-import torch
+# import torch
 
-cuda_devices = os.environ.get('CUDA_VISIBLE_DEVICES')
-if cuda_devices:
-    # Get the first available GPU from CUDA_VISIBLE_DEVICES
-    device_id = int(cuda_devices.split(',')[0])
-    torch.cuda.set_device(device_id)
-    print(f"Using GPU: {device_id}")
-else:
-    print("No CUDA_VISIBLE_DEVICES set, using default GPU if available")
+# cuda_devices = os.environ.get('CUDA_VISIBLE_DEVICES')
+# if cuda_devices:
+#     # Get the first available GPU from CUDA_VISIBLE_DEVICES
+#     device_id = int(cuda_devices.split(',')[0])
+#     torch.cuda.set_device(device_id)
+#     print(f"Using GPU: {device_id}")
+# else:
+#     print("No CUDA_VISIBLE_DEVICES set, using default GPU if available")
 
-# Then use this device throughout your code
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
-print(f"GPU available: {torch.cuda.is_available()}")
-print(f"Current device: {torch.cuda.current_device()}")
-print(f"Device count: {torch.cuda.device_count()}")
+# # Then use this device throughout your code
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# print(f"Using device: {device}")
+# print(f"GPU available: {torch.cuda.is_available()}")
+# print(f"Current device: {torch.cuda.current_device()}")
+# print(f"Device count: {torch.cuda.device_count()}")
 
 # Create directories to hold models and logs
 model_dir = "models"
@@ -65,34 +65,6 @@ class CustomCallback(BaseCallback):
 		# self.logger.record("climb/success_rate", success_rate)
 		self.logger.record("climb/rollout_count", self.rollout_count)
 
-
-# def make_env(env_id: str, rank: int, seed: int = 0, max_steps: int = 1000, stance: stances.Stance = stances.STANCE_NONE) -> gym.Env:
-# 	def _init():
-# 		env = gym.make(env_id, render_mode=None, max_ep_steps=max_steps, **stance.get_args())
-# 		m_env = Monitor(env)
-# 		m_env.reset(seed=seed + rank)
-# 		return m_env
-
-# 	set_random_seed(seed)
-# 	return _init
-
-
-# THIRD ATTEMPT 
-# def make_env(env_id: str, rank: int, seed: int = 0, max_steps: int = 1000, stance: stances.Stance = stances.STANCE_NONE) -> gym.Env:
-#     def _init():
-#         env_args = stance.get_args()
-#         # Removing 'motion_path', 'action_override', and 'motion_exclude_targets'
-#         env_args.pop('motion_path', None)
-#         env_args.pop('action_override', None)
-#         env_args.pop('motion_exclude_targets', None)
-#         env = gym.make(env_id, render_mode=None, max_ep_steps=max_steps, **env_args)
-#         m_env = Monitor(env)
-#         m_env.reset(seed=seed + rank)
-#         return m_env
-
-#     set_random_seed(seed)
-#     return _init
-
 def make_env(env_id: str, rank: int, seed: int = 0, max_steps: int = 1000, stance: stances.Stance = stances.STANCE_NONE) -> gym.Env:
     def _init():
         #with open('./config.json', 'r') as f:
@@ -118,8 +90,6 @@ def make_env(env_id: str, rank: int, seed: int = 0, max_steps: int = 1000, stanc
     return _init
 
 
-
-
 def train(env_name, sb3_algo, workers, path_to_model=None):
 	config = {
 		"policy_type": "MlpPolicy",
@@ -138,7 +108,7 @@ def train(env_name, sb3_algo, workers, path_to_model=None):
 	max_ep_steps = 600
 	stances.set_root_path("./humanoid_climb")
 	stance = stances.STANCE_14_1
-	vec_env = SubprocVecEnv([make_env(env_name, i, max_steps=max_ep_steps, stance=stance) for i in range(workers, 4)], start_method="spawn")
+	vec_env = SubprocVecEnv([make_env(env_name, i, max_steps=max_ep_steps, stance=stance) for i in range(workers)], start_method="spawn")
 
 	model = None
 	save_path = f"{model_dir}/{run.id}"
@@ -148,12 +118,12 @@ def train(env_name, sb3_algo, workers, path_to_model=None):
 
 	if sb3_algo == 'PPO':
 		if path_to_model is None:
-			model = sb.PPO('MlpPolicy', vec_env, verbose=1, device=device, tensorboard_log=log_dir)
+			model = sb.PPO('MlpPolicy', vec_env, verbose=1, device='cuda', tensorboard_log=log_dir)
 		else:
 			model = sb.PPO.load(path_to_model, env=vec_env)
 	elif sb3_algo == 'SAC':
 		if path_to_model is None:
-			model = sb.SAC('MlpPolicy', vec_env, verbose=1, device=device, tensorboard_log=log_dir)
+			model = sb.SAC('MlpPolicy', vec_env, verbose=1, device='cuda', tensorboard_log=log_dir)
 		else:
 			model = sb.SAC.load(path_to_model, env=vec_env)
 	else:
@@ -246,4 +216,4 @@ if __name__ == '__main__':
 		else:
 			print(f'{args.test} not found.')
 
-torch.set_num_threads(4)  # Adjust this number based on your CPU allocation
+# torch.set_num_threads(4)  # Adjust this number based on your CPU allocation
