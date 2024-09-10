@@ -9,7 +9,6 @@ import argparse
 import json
 from humanoid_climb.climbing_config import ClimbingConfig
 
-
 from stable_baselines3.common.callbacks import EvalCallback, BaseCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import SubprocVecEnv, VecVideoRecorder, VecFrameStack
@@ -19,6 +18,14 @@ from stable_baselines3.common.callbacks import EvalCallback
 import wandb
 from wandb.integration.sb3 import WandbCallback
 import humanoid_climb.stances as stances
+
+import torch
+torch.cuda.set_device(2,3)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+print(f"GPU available: {torch.cuda.is_available()}")
+print(f"Current device: {torch.cuda.current_device()}")
+print(f"Device count: {torch.cuda.device_count()}")
 
 # Create directories to hold models and logs
 model_dir = "models"
@@ -121,7 +128,7 @@ def train(env_name, sb3_algo, workers, path_to_model=None):
 	max_ep_steps = 600
 	stances.set_root_path("./humanoid_climb")
 	stance = stances.STANCE_14_1
-	vec_env = SubprocVecEnv([make_env(env_name, i, max_steps=max_ep_steps, stance=stance) for i in range(workers)], start_method="spawn")
+	vec_env = SubprocVecEnv([make_env(env_name, i, max_steps=max_ep_steps, stance=stance) for i in range(workers, 4)], start_method="spawn")
 
 	model = None
 	save_path = f"{model_dir}/{run.id}"
@@ -131,12 +138,12 @@ def train(env_name, sb3_algo, workers, path_to_model=None):
 
 	if sb3_algo == 'PPO':
 		if path_to_model is None:
-			model = sb.PPO('MlpPolicy', vec_env, verbose=1, device='cuda', tensorboard_log=log_dir)
+			model = sb.PPO('MlpPolicy', vec_env, verbose=1, device=device, tensorboard_log=log_dir)
 		else:
 			model = sb.PPO.load(path_to_model, env=vec_env)
 	elif sb3_algo == 'SAC':
 		if path_to_model is None:
-			model = sb.SAC('MlpPolicy', vec_env, verbose=1, device='cuda', tensorboard_log=log_dir)
+			model = sb.SAC('MlpPolicy', vec_env, verbose=1, device=device, tensorboard_log=log_dir)
 		else:
 			model = sb.SAC.load(path_to_model, env=vec_env)
 	else:
@@ -228,3 +235,5 @@ if __name__ == '__main__':
 			test(env, args.sb3_algo, path_to_model=args.test)
 		else:
 			print(f'{args.test} not found.')
+
+torch.set_num_threads(4)  # Adjust this number based on your CPU allocation
