@@ -31,11 +31,11 @@ else:
     print("No CUDA_VISIBLE_DEVICES set, using default GPU if available")
 
 # # Then use this device throughout your code
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# print(f"Using device: {device}")
-# print(f"GPU available: {torch.cuda.is_available()}")
-# print(f"Current device: {torch.cuda.current_device()}")
-# print(f"Device count: {torch.cuda.device_count()}")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+print(f"GPU available: {torch.cuda.is_available()}")
+print(f"Current device: {torch.cuda.current_device()}")
+print(f"Device count: {torch.cuda.device_count()}")
 
 # Create directories to hold models and logs
 model_dir = "models"
