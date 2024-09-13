@@ -21,21 +21,10 @@ import humanoid_climb.stances as stances
 
 import torch
 
-cuda_devices = os.environ.get('CUDA_VISIBLE_DEVICES')
-if cuda_devices:
-    # Get the first available GPU from CUDA_VISIBLE_DEVICES
-    device_id = int(cuda_devices.split(',')[0])
-    torch.cuda.set_device(device_id)
-    print(f"Using GPU: {device_id}")
-else:
-    print("No CUDA_VISIBLE_DEVICES set, using default GPU if available")
+# Set up CUDA device
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# # Then use this device throughout your code
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
-print(f"GPU available: {torch.cuda.is_available()}")
-print(f"Current device: {torch.cuda.current_device()}")
-print(f"Device count: {torch.cuda.device_count()}")
+print(f"Using device: {DEVICE}")
 
 # Create directories to hold models and logs
 model_dir = "models"
@@ -67,20 +56,8 @@ class CustomCallback(BaseCallback):
 
 def make_env(env_id: str, rank: int, seed: int = 0, max_steps: int = 1000, stance: stances.Stance = stances.STANCE_NONE) -> gym.Env:
     def _init():
-        #with open('./config.json', 'r') as f:
-        #    config = json.load(f)
+        
         config = ClimbingConfig('./config.json')
-
-
-        # Merge stance args with config
-        #env_args = stance.get_args()
-        #config.update(env_args)
-
-        # Remove unnecessary keys
-        #config.pop('motion_path', None)
-        #config.pop('action_override', None)
-        #config.pop('motion_exclude_targets', None)
-
         env = gym.make(env_id, config=config, render_mode=None, max_ep_steps=max_steps)
         m_env = Monitor(env)
         m_env.reset(seed=seed + rank)
@@ -118,12 +95,12 @@ def train(env_name, sb3_algo, workers, path_to_model=None):
 
 	if sb3_algo == 'PPO':
 		if path_to_model is None:
-			model = sb.PPO('MlpPolicy', vec_env, verbose=1, device='cuda', tensorboard_log=log_dir)
+			model = sb.PPO('MlpPolicy', vec_env, verbose=1, device=DEVICE, tensorboard_log=log_dir)
 		else:
 			model = sb.PPO.load(path_to_model, env=vec_env)
 	elif sb3_algo == 'SAC':
 		if path_to_model is None:
-			model = sb.SAC('MlpPolicy', vec_env, verbose=1, device='cuda', tensorboard_log=log_dir)
+			model = sb.SAC('MlpPolicy', vec_env, verbose=1, device=DEVICE, tensorboard_log=log_dir)
 		else:
 			model = sb.SAC.load(path_to_model, env=vec_env)
 	else:
