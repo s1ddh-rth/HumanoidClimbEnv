@@ -95,7 +95,7 @@ def train(env_name, sb3_algo, workers, path_to_model=None):
 
 	if sb3_algo == 'PPO':
 		if path_to_model is None:
-			model = sb.PPO('MlpPolicy', vec_env, verbose=1, device=DEVICE, tensorboard_log=log_dir)
+			model = sb.PPO('MlpPolicy', vec_env, verbose=1, device=DEVICE, tensorboard_log=log_dir, batch_size=2048)
 		else:
 			model = sb.PPO.load(path_to_model, env=vec_env)
 	elif sb3_algo == 'SAC':

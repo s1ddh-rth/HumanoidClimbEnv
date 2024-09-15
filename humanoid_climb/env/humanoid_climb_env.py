@@ -54,6 +54,8 @@ class HumanoidClimbEnv(gym.Env):
         self.floor = Asset(self._p, self.config.plane)
         self.wall = Asset(self._p, self.config.surface)
         self.climber = Humanoid(self._p, self.config.climber)
+        # Initialize prevheight using the center of mass
+        self.prevheight = self.get_com_height()
 
         self.debug_stance_text = self._p.addUserDebugText(text=f"", textPosition=[0, 0, 0], textSize=1, lifeTime=0.1, textColorRGB=[1.0, 0.0, 1.0])
 
@@ -63,7 +65,12 @@ class HumanoidClimbEnv(gym.Env):
             self._p.addUserDebugText(text=key, textPosition=self.targets[key].body.initialPosition, textSize=0.7, lifeTime=0.0, textColorRGB=[0.0, 0.0, 1.0])
 
         self.climber.targets = self.targets
-
+    def get_com_height(self):
+        # Calculate and return the height of the center of mass
+        parts = self.climber.parts
+        total_mass = sum(self._p.getDynamicsInfo(self.climber.robot, part.bodyPartIndex)[0] for part in parts.values())
+        weighted_height = sum(self._p.getDynamicsInfo(self.climber.robot, part.bodyPartIndex)[0] * part.get_position()[2] for part in parts.values())
+        return weighted_height / total_mass
     def step(self, action):
 
         self._p.stepSimulation()
@@ -95,7 +102,8 @@ class HumanoidClimbEnv(gym.Env):
         self.desired_stance_index = 0
         self.desired_stance = self.motion_path[0]
         self.best_dist_to_stance = self.get_distance_from_desired_stance()
-
+        self.prevheight = self.get_com_height()
+        
         ob = self._get_obs()
         info = self._get_info()
 
@@ -117,6 +125,47 @@ class HumanoidClimbEnv(gym.Env):
             reward += (self.max_ep_steps - self.steps) * -2
 
         # self.visualise_reward(reward, -6, 0)
+
+        return reward
+    
+    def calculate_advanced_dyno_reward(self):
+        reward = 0
+
+        # Base stance reward (slouching)
+        torso_position = self.climber.robot_body.current_position()
+        torso_orientation = self.climber.robot_body.current_orientation()
+        wall_distance = abs(torso_position[1] - self.wall.body.get_position()[1])
+        slouch_angle = p.getEulerFromQuaternion(torso_orientation)[1]  # pitch angle
+        reward -= (wall_distance + abs(slouch_angle - np.pi/6))  # Negative reward to minimize
+
+
+        # Vertical velocity reward
+        torso_velocity = self.climber.robot_body.speed()
+        reward -= max(0, 5 - torso_velocity[2]) * 2  # Negative reward for lack of upward velocity
+
+
+        # Drastic upward motion reward
+        prev_height = self.previous_height if hasattr(self, 'previous_height') else self.climber.robot_body.current_position()[2]
+        current_height = self.climber.robot_body.current_position()[2]
+        height_change = current_height - prev_height
+        self.previous_height = current_height
+        reward -= max(0, 0.1 - height_change) * 10  # Negative reward for lack of upward movement
+
+        # Distance to target reward
+        current_dist = self.get_distance_from_desired_stance()
+        reward -= np.sum(current_dist)
+
+        # Body orientation reward
+        orientation = self.climber.get_orientation()
+        reward -= abs(orientation[2] - 1)  # Negative reward for non-upright orientation
+
+        # Large negative reward for not reaching new stance
+        if not self.check_reached_stance():
+            reward -= 100
+
+        # Penalty for falling
+        if self.is_on_floor():
+            reward -= 100
 
         return reward
 
