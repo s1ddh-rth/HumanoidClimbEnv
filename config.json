@@ -96,26 +96,31 @@
   },
 
   "holds": {
-    "hold_0": {"asset": "asset_hold", "position": [0.4, -0.5, 0.5], "orientation": [0, 0, 0, 1]},
-    "hold_1": {"asset": "asset_hold", "position": [0.4, -0.2, 0.6], "orientation": [0, 0, 0, 1]},
-    "hold_2": {"asset": "asset_hold", "position": [0.4, 0.4, 0.7], "orientation": [0, 0, 0, 1]},
-    "hold_3": {"asset": "asset_hold", "position": [0.4, -0.6, 0.8], "orientation": [0, 0, 0, 1]},
-    "hold_4": {"asset": "asset_hold", "position": [0.4, -0.2, 1.2], "orientation": [0, 0, 0, 1]},
-    "hold_5": {"asset": "asset_hold", "position": [0.4, 0.6, 1.2], "orientation": [0, 0, 0, 1]},
-    "hold_6": {"asset": "asset_hold", "position": [0.4, -0.7, 1.7], "orientation": [0, 0, 0, 1]},
-    "hold_7": {"asset": "asset_hold", "position": [0.4, -0.2, 1.7], "orientation": [0, 0, 0, 1]},
-    "hold_8": {"asset": "asset_hold", "position": [0.4, 0.2, 1.7], "orientation": [0, 0, 0, 1]},
-    "hold_9": {"asset": "asset_hold", "position": [0.4, 0.7, 1.7], "orientation": [0, 0, 0, 1]},
-    "hold_10": {"asset": "asset_hold", "position": [0.4, -0.1, 2.4], "orientation": [0, 0, 0, 1]},
-    "hold_11": {"asset": "asset_hold", "position": [0.4, 0.5, 2.2], "orientation": [0, 0, 0, 1]},
-    "hold_12": {"asset": "asset_hold", "position": [0.4, 0.5, 2.6], "orientation": [0, 0, 0, 1]},
-    "hold_13": {"asset": "asset_hold", "position": [0.4, -0.5, 2.7], "orientation": [0, 0, 0, 1]},
-    "hold_14": {"asset": "asset_hold", "position": [0.4, 0.2, 3], "orientation": [0, 0, 0, 1]},
-    "hold_15": {"asset": "asset_hold", "position": [0.4, 0.4, 3.3], "orientation": [0, 0, 0, 1]},
-    "hold_16": {"asset": "asset_hold", "position": [0.4, -0.2, 3.5], "orientation": [0, 0, 0, 1]},
-    "hold_17": {"asset": "asset_hold", "position": [0.4, 0.2, 3.6], "orientation": [0, 0, 0, 1]},
-    "hold_18": {"asset": "asset_hold", "position": [0.4, -0.5, 3.7], "orientation": [0, 0, 0, 1]}
-
+    "hold_1": {
+      "asset": "asset_hold",
+      "position": [0.4, -0.3, 0.25],
+      "orientation": [0, 0, 0, 1]
+    },
+    "hold_2": {
+      "asset": "asset_hold",
+      "position": [0.4, 0.3, 0.45],
+      "orientation": [0, 0, 0, 1]
+    },
+    "hold_9": {
+      "asset": "asset_hold",
+      "position": [0.4, -0.3, 1.55],
+      "orientation": [0, 0, 0, 1]
+    },
+    "hold_10": {
+      "asset": "asset_hold",
+      "position": [0.4, 0.3, 1.75],
+      "orientation": [0, 0, 0, 1]
+    },
+    "hold_18": {
+      "asset": "asset_hold",
+      "position": [0.4, 0.3, 3.05],
+      "orientation": [0, 0, 0, 1]
+    }
   },
 
   "stance_path": {
@@ -125,40 +130,30 @@
       "ignore_holds": [[], [], [], []]
     },
     "1": {
-      "desired_holds": ["hold_8", "hold_7", -1, -1],
+      "desired_holds": ["hold_10", "hold_9", -1, -1],
       "force_attach": [null, null, null, null],
       "ignore_holds": [[], [], [], []]
     },
     "2": {
-      "desired_holds": ["hold_8", "hold_7", "hold_2", -1],
+      "desired_holds": ["hold_10", "hold_9", "hold_2", -1],
       "force_attach": [1, 1, null, null],
       "ignore_holds": [[], [], [], []]
     },
     "3": {
-      "desired_holds": ["hold_8", "hold_7", "hold_2", "hold_1"],
+      "desired_holds": ["hold_10", "hold_9", "hold_2", "hold_1"],
       "force_attach": [1, 1, 1, null],
       "ignore_holds": [[], [], [], []]
     },
     "4": {
-      "desired_holds": ["hold_11", "hold_7", "hold_2", "hold_1"],
-      "force_attach": [null, 1, 1, 1],
-      "ignore_holds": [["hold_8"], [], [], []]
+      "desired_holds": ["hold_18", "hold_18", -1, -1],
+      "force_attach": [null, null, null, null],
+      "ignore_holds": [["hold_10"], ["hold_9"], ["hold_2"], ["hold_1"]]
     },
     "5": {
-      "desired_holds": ["hold_11", "hold_10", "hold_2", "hold_1"],
-      "force_attach": [1, null, 1, 1],
-      "ignore_holds": [[], ["hold_7"], [], []]
-    },
-    "6": {
-      "desired_holds": ["hold_11", "hold_10", "hold_2", "hold_4"],
-      "force_attach": [1, 1, 1, null],
-      "ignore_holds": [[], [], [], ["hold_1"]]
-    },
-    "7": {
-      "desired_holds": ["hold_12", "hold_10", "hold_2", "hold_4"],
-      "force_attach": [null, 1, 1, 1],
-      "ignore_holds": [["hold_11"], [], [], []]
+      "desired_holds": ["hold_18", "hold_18", "hold_10", "hold_9"],
+      "force_attach": [1, 1, null, null],
+      "ignore_holds": [[], [], [], []]
     }
   }
-  
+
 }
